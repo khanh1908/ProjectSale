@@ -1,0 +1,89 @@
+﻿@model List<CartItem>
+
+<h2 class="my-4">🛒 Giỏ hàng của bạn</h2>
+
+@if (Model.Count == 0)
+{
+    <p class="alert alert-warning">Giỏ hàng của bạn đang trống.</p>
+}
+else
+{
+    <table class="table table-bordered">
+        <thead class="thead-dark">
+            <tr>
+                <th>Hình ảnh</th>
+                <th>Sản phẩm</th>
+                <th>Giá</th>
+                <th>Số lượng</th>
+                <th>Tổng cộng</th>
+                <th>Hành động</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr data-id="@item.Id">
+                    <td>
+                        <img src="@item.Product.ImageUrl" alt="@item.Product.Name" width="80" height="80" class="rounded">
+                    </td>
+                    <td>@item.Product.Name</td>
+                    <td class="price">@item.Product.Price.ToString("N0") VNĐ</td>
+                    <td>
+                        <input type="number" class="quantity-input form-control text-center" value="@item.Quantity" min="1" style="width: 80px;" />
+                    </td>
+                    <td class="total">@((item.Product.Price * item.Quantity).ToString("N0")) VNĐ</td>
+                    <td>
+                        <a asp-action="RemoveFromCart" asp-route-id="@item.Id" class="btn btn-danger btn-sm">🗑 Xóa</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <div class="text-right mt-3">
+        <h4><strong>🧾 Tổng tiền: <span id="cart-total">@Model.Sum(item => item.Product.Price * item.Quantity).ToString("N0")</span> VNĐ</strong></h4>
+    </div>
+
+    <div class="text-right mt-3">
+        <a asp-action="Checkout" class="btn btn-primary btn-lg">🛍 Thanh toán</a>
+    </div>
+}
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $(".quantity-input").on("change", function () {
+                var row = $(this).closest("tr");
+                var cartItemId = row.data("id");
+                var newQuantity = $(this).val();
+
+                if (newQuantity < 1) {
+                    newQuantity = 1;
+                    $(this).val(1);
+                }
+
+                $.ajax({
+                    url: "/Cart/UpdateQuantity",
+                    type: "POST",
+                    data: { id: cartItemId, quantity: newQuantity },
+                    success: function () {
+                        var price = parseFloat(row.find(".price").text().replace(/\D/g, '')); 
+                        var total = price * newQuantity;
+                        row.find(".total").text(total.toLocaleString() + " VNĐ");
+
+                        updateCartTotal();
+                    }
+                });
+            });
+
+            function updateCartTotal() {
+                var total = 0;
+                $(".total").each(function () {
+                    total += parseFloat($(this).text().replace(/\D/g, ''));
+                });
+                $("#cart-total").text(total.toLocaleString() + " VNĐ");
+            }
+        });
+    </script>
+}
