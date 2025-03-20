@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using WebApplication1.Models;
 
 public class ProductController : Controller
@@ -23,5 +22,56 @@ public class ProductController : Controller
         if (product == null) return NotFound();
         return View(product);
     }
-    
+
+    // Hiển thị form thêm sản phẩm
+    public IActionResult Create()
+    {
+        return View();
+    }
+
+    [HttpPost]
+    public IActionResult Create(Product product)
+    {
+        if (ModelState.IsValid)
+        {
+            _context.Products.Add(product);
+            _context.SaveChanges();
+            return RedirectToAction("Index", "Admin");
+        }
+        return View(product);
+    }
+
+    public IActionResult Edit(int id)
+    {
+        var product = _context.Products.Find(id);
+        if (product == null)
+        {
+            return NotFound();
+        }
+        return View(product);
+    }
+
+    [HttpPost]
+    public IActionResult Edit(Product product)
+    {
+        if (ModelState.IsValid)
+        {
+            _context.Products.Update(product);
+            _context.SaveChanges();
+            return RedirectToAction("Index", "Admin");
+        }
+        return View(product);
+    }
+    public IActionResult Delete(int id)
+    {
+        var product = _context.Products.Find(id);
+        if (product == null)
+        {
+            return NotFound();
+        }
+
+        _context.Products.Remove(product);
+        _context.SaveChanges();
+        return RedirectToAction("Index", "Admin");
+    }
 }

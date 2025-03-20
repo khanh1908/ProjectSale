@@ -1,47 +1,108 @@
-﻿@model List<Product>
+﻿@{
+    ViewData["Title"] = "Đăng nhập & Đăng ký";
+}
 
-<div class="container mt-4">
-    <h2 class="text-center mb-4">🛍 Danh Sách Sản Phẩm</h2>
+<div class="container mt-5">
+    <h2 class="text-center mb-4">🔐 Chào mừng bạn đến với cửa hàng</h2>
 
-    <div class="row">
-        @foreach (var product in Model)
-        {
-            <div class="col-md-4 col-lg-3 mb-4">
-                <div class="card shadow-sm h-100 border-0">
-                    <img src="@product.ImageUrl" class="card-img-top img-fluid rounded-top" alt="@product.Name" style="height: 250px; object-fit: cover;">
+    <div class="card mx-auto shadow-sm" style="max-width: 400px;">
+        <div class="card-body">
+            <ul class="nav nav-tabs mb-3" id="authTabs">
+                <li class="nav-item">
+                    <a class="nav-link @(ViewBag.RegisterError != null ? "" : "active")" id="loginTab" data-bs-toggle="tab" href="#loginForm">Đăng nhập</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link @(ViewBag.RegisterError != null ? "active" : "")" id="registerTab" data-bs-toggle="tab" href="#registerForm">Đăng ký</a>
+                </li>
+            </ul>
 
-                    <div class="card-body text-center">
-                        <h5 class="card-title font-weight-bold">@product.Name</h5>
-                        <p class="text-danger font-weight-bold">@product.Price.ToString("N0") VNĐ</p>
+            <div class="tab-content">
+                <!-- Form Đăng Nhập -->
+                <div class="tab-pane fade @(ViewBag.RegisterError != null ? "" : "show active")" id="loginForm">
+                    @if (TempData["SuccessMessage"] != null)
+                    {
+                        <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+                    }
 
-                        <div class="d-flex justify-content-between">
-                            <a href="@Url.Action("Detail", "Product", new { id = product.Id })" class="btn btn-outline-primary btn-sm">
-                                🔍 Xem chi tiết
-                            </a>
-                            <a href="@Url.Action("AddToCart", "Cart", new { productId = product.Id })" class="btn btn-success btn-sm">
-                                🛒 Thêm vào giỏ
-                            </a>
+                    <form method="post" action="@Url.Action("Login", "Account")">
+                        @if (ViewBag.Error != null)
+                        {
+                            <div class="alert alert-danger">@ViewBag.Error</div>
+                        }
+
+                        <div class="mb-3">
+                            <label>Tên đăng nhập</label>
+                            <input type="text" name="name" class="form-control" required />
                         </div>
-                    </div>
+                        <div class="mb-3">
+                            <label>Mật khẩu</label>
+                            <input type="password" name="password" class="form-control" required />
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">🔑 Đăng nhập</button>
+                    </form>
+                </div>
+
+                <!-- Form Đăng Ký -->
+                <div class="tab-pane fade @(ViewBag.RegisterError != null ? "show active" : "")" id="registerForm">
+                    <form method="post" action="@Url.Action("Register", "Account")" onsubmit="return validatePassword()">
+                        @if (ViewBag.RegisterError != null)
+                        {
+                            <div class="alert alert-danger">@ViewBag.RegisterError</div>
+                        }
+
+                        <div class="mb-3">
+                            <label>Tên đăng nhập</label>
+                            <input type="text" name="name" class="form-control" required />
+                        </div>
+                        <div class="mb-3">
+                            <label>Mật khẩu</label>
+                            <input type="password" id="password" name="password" class="form-control" required oninput="checkPasswordMatch()" />
+                        </div>
+                        <div class="mb-3">
+                            <label>Nhập lại mật khẩu</label>
+                            <input type="password" id="confirmPassword" class="form-control" required oninput="checkPasswordMatch()" />
+                            <small id="passwordError" class="text-danger" style="display: none;">⚠️ Mật khẩu không khớp!</small>
+                        </div>
+                        <button type="submit" class="btn btn-success w-100">📝 Đăng ký</button>
+                    </form>
                 </div>
             </div>
-        }
+        </div>
     </div>
 </div>
 
 <style>
     .card {
-        transition: transform 0.2s, box-shadow 0.3s;
         border-radius: 10px;
+        padding: 20px;
     }
-
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-        }
 
     .btn {
         border-radius: 20px;
         font-weight: bold;
     }
 </style>
+
+<script>
+    function checkPasswordMatch() {
+        var password = document.getElementById("password").value;
+        var confirmPassword = document.getElementById("confirmPassword").value;
+        var errorText = document.getElementById("passwordError");
+
+        if (password !== confirmPassword) {
+            errorText.style.display = "block";
+        } else {
+            errorText.style.display = "none";
+        }
+    }
+
+    function validatePassword() {
+        var password = document.getElementById("password").value;
+        var confirmPassword = document.getElementById("confirmPassword").value;
+
+        if (password !== confirmPassword) {
+            return false;
+        }
+        return true;
+    }
+</script>

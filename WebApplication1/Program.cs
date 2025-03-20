@@ -1,4 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +14,10 @@ builder.Services.AddDbContext<MyDBContext>(options =>
     options.UseSqlServer(connectionString));
 
 builder.Services.AddControllersWithViews();
+
+// Thêm hỗ trợ Session
+builder.Services.AddSession();
+builder.Services.AddDistributedMemoryCache();
 
 var app = builder.Build();
 
@@ -24,6 +32,9 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 app.UseAuthorization();
+
+// Kích hoạt Session
+app.UseSession();
 
 app.MapControllerRoute(
     name: "default",
